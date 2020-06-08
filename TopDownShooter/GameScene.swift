@@ -14,10 +14,14 @@ class GameScene: SKScene {
     var player: SKNode!
     
     var keyIsDown = false;
-    var gameEvent: NSEvent!
+    var keyEvent: NSEvent!
     
     override func didMove(to view: SKView) {
-        player = childNode(withName: "player")
+        let options = [NSTrackingArea.Options.mouseMoved, NSTrackingArea.Options.activeInKeyWindow] as NSTrackingArea.Options
+        let trackingArea = NSTrackingArea(rect:view.frame,options:options,owner:self,userInfo:nil)
+        view.addTrackingArea(trackingArea)
+        
+        player = self.childNode(withName: "player")
         
         let border = SKPhysicsBody(edgeLoopFrom: self.frame)
         border.restitution = 1
@@ -29,6 +33,7 @@ class GameScene: SKScene {
         let moveForce: CGFloat = 350;
         
         print("keyDown: \(event.characters!) keyCode: \(event.keyCode)")
+        
         if event.keyCode == 123 || event.keyCode ==  0 {
             // Left
             player.physicsBody?.velocity.dx = -moveForce;
@@ -51,11 +56,18 @@ class GameScene: SKScene {
     }
 
     override func mouseMoved(with event: NSEvent) {
+        let mousePos = event.location(in: self)
+        
+        let dx = mousePos.x - player.position.x
+        let dy = mousePos.y - player.position.y
+        let angleToMouse = atan2(dy, dx)
+        
+        player.zRotation = angleToMouse
     }
     
     override func keyDown(with event: NSEvent) {
         keyIsDown = true
-        gameEvent = event
+        keyEvent = event
     }
     
     override func keyUp(with event: NSEvent) {
@@ -64,7 +76,7 @@ class GameScene: SKScene {
     
     override func update(_ currentTime: TimeInterval) {
         if keyIsDown {
-            keyPress(event: gameEvent)
+            keyPress(event: keyEvent)
         } else {
             player.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
         }
