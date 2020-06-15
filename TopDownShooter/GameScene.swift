@@ -74,7 +74,7 @@ class GameScene: SKScene {
         let startPos = CGPoint(x: cos(player.zRotation) * 40 + player.position.x, y: sin(player.zRotation) * 40 + player.position.y)
         
         let bulletRadius: CGFloat = 5
-        let bulletSpeed: CGFloat = 500
+        let bulletSpeed: CGFloat = 700
         
         // Create Bullet
         let bullet = SKShapeNode(circleOfRadius: bulletRadius)
@@ -88,8 +88,8 @@ class GameScene: SKScene {
         bullet.physicsBody?.friction = 0
         bullet.physicsBody?.categoryBitMask = 1
         bullet.physicsBody?.collisionBitMask = 1
-        bullet.physicsBody?.velocity.dx = cos(player.zRotation) * bulletSpeed
-        bullet.physicsBody?.velocity.dy = sin(player.zRotation) * bulletSpeed
+        bullet.physicsBody?.velocity.dx = cos(player.zRotation) * bulletSpeed + (player.physicsBody?.velocity.dx)!
+        bullet.physicsBody?.velocity.dy = sin(player.zRotation) * bulletSpeed + (player.physicsBody?.velocity.dy)!
         bullet.physicsBody?.mass = 0.01
         
         // Add To Scene
