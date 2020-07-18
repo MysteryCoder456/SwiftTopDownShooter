@@ -29,6 +29,18 @@ class GameScene: SKScene {
         self.physicsBody = border
     }
     
+    // Helper Functions
+    
+    func makeEnemy() {
+        let enemy = childNode(withName: "enemy")?.copy() as! SKNode
+        
+        let posX = CGFloat.random(in: frame.minX...frame.maxX)
+        let posY = CGFloat.random(in: frame.minY...frame.maxY)
+        enemy.position = CGPoint(x: posX, y: posY);
+        
+        self.addChild(enemy)
+    }
+    
     
     // Keyboard Events
     
