@@ -31,6 +31,32 @@ class GameScene: SKScene {
     
     // Helper Functions
     
+    func makeBullet() {
+        let startPos = CGPoint(x: cos(player.zRotation) * 40 + player.position.x, y: sin(player.zRotation) * 40 + player.position.y)
+        
+        let bulletRadius: CGFloat = 5
+        let bulletSpeed: CGFloat = 700
+        
+        // Create Bullet
+        let bullet = SKShapeNode(circleOfRadius: bulletRadius)
+        bullet.strokeColor = .red
+        bullet.fillColor = .red
+        bullet.position = startPos
+        
+        // Bullet's Physics Body
+        bullet.physicsBody = SKPhysicsBody(circleOfRadius: bulletRadius)
+        bullet.physicsBody?.restitution = 1
+        bullet.physicsBody?.friction = 0
+        bullet.physicsBody?.categoryBitMask = 1
+        bullet.physicsBody?.collisionBitMask = 1
+        bullet.physicsBody?.velocity.dx = cos(player.zRotation) * bulletSpeed + (player.physicsBody?.velocity.dx)!
+        bullet.physicsBody?.velocity.dy = sin(player.zRotation) * bulletSpeed + (player.physicsBody?.velocity.dy)!
+        bullet.physicsBody?.mass = 0.0001
+        
+        // Add To Scene
+        self.addChild(bullet)
+    }
+    
     func makeEnemy() {
         let enemy = childNode(withName: "enemy")?.copy() as! SKNode
         
@@ -87,29 +113,7 @@ class GameScene: SKScene {
     // Mouse Events
     
     override func mouseDown(with event: NSEvent) {
-        let startPos = CGPoint(x: cos(player.zRotation) * 40 + player.position.x, y: sin(player.zRotation) * 40 + player.position.y)
-        
-        let bulletRadius: CGFloat = 5
-        let bulletSpeed: CGFloat = 700
-        
-        // Create Bullet
-        let bullet = SKShapeNode(circleOfRadius: bulletRadius)
-        bullet.strokeColor = .red
-        bullet.fillColor = .red
-        bullet.position = startPos
-        
-        // Bullet's Physics Body
-        bullet.physicsBody = SKPhysicsBody(circleOfRadius: bulletRadius)
-        bullet.physicsBody?.restitution = 1
-        bullet.physicsBody?.friction = 0
-        bullet.physicsBody?.categoryBitMask = 1
-        bullet.physicsBody?.collisionBitMask = 1
-        bullet.physicsBody?.velocity.dx = cos(player.zRotation) * bulletSpeed + (player.physicsBody?.velocity.dx)!
-        bullet.physicsBody?.velocity.dy = sin(player.zRotation) * bulletSpeed + (player.physicsBody?.velocity.dy)!
-        bullet.physicsBody?.mass = 0.01
-        
-        // Add To Scene
-        self.addChild(bullet)
+        makeBullet()
     }
 
     override func mouseMoved(with event: NSEvent) {
@@ -127,6 +131,10 @@ class GameScene: SKScene {
             keyPress(event: keyEvent)
         } else {
             player.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
+        }
+        
+        if Int.random(in: 0...1000) < 2 {
+            makeEnemy()
         }
     }
 }
