@@ -56,27 +56,31 @@ class GameScene: SKScene {
     func keyPress(event: NSEvent) {
         let moveForce: CGFloat = 350;
         
+        var moveVel = CGVector(dx: 0, dy: 0)
+        
         print("keyDown: \(event.characters!) keyCode: \(event.keyCode)")
         
         if event.keyCode == 123 || event.keyCode ==  0 {
             // Left
-            player.physicsBody?.velocity.dx = -moveForce;
+            moveVel.dx += -moveForce;
         }
         
         if event.keyCode == 124 || event.keyCode == 2 {
             // Right
-            player.physicsBody?.velocity.dx = moveForce;
+            moveVel.dx += moveForce;
         }
         
         if event.keyCode == 125 || event.keyCode == 1 {
             // Down
-            player.physicsBody?.velocity.dy = -moveForce;
+            moveVel.dy += -moveForce;
         }
         
         if event.keyCode == 126 || event.keyCode == 13 {
             // Up
-            player.physicsBody?.velocity.dy = moveForce;
+            moveVel.dy += moveForce;
         }
+        
+        player.physicsBody?.velocity = moveVel
     }
     
     
