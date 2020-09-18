@@ -16,6 +16,8 @@ class GameScene: SKScene {
     var keyIsDown = false;
     var keyEvent: NSEvent!
     
+    var shootTimer = 0
+    
     override func didMove(to view: SKView) {
         let options = [NSTrackingArea.Options.mouseMoved, NSTrackingArea.Options.activeInKeyWindow] as NSTrackingArea.Options
         let trackingArea = NSTrackingArea(rect:view.frame,options:options,owner:self,userInfo:nil)
@@ -24,15 +26,17 @@ class GameScene: SKScene {
         player = self.childNode(withName: "player")
         
         let border = SKPhysicsBody(edgeLoopFrom: self.frame)
-        border.restitution = 1
+        border.restitution = 0.7
         border.friction = 0
         self.physicsBody = border
+        
+        self.makeEnemy()
     }
     
     // Helper Functions
     
-    func makeBullet() {
-        let startPos = CGPoint(x: cos(player.zRotation) * 40 + player.position.x, y: sin(player.zRotation) * 40 + player.position.y)
+    func makeBullet(shooter: SKNode) {
+        let startPos = CGPoint(x: cos(shooter.zRotation) * 40 + shooter.position.x, y: sin(shooter.zRotation) * 40 + shooter.position.y)
         
         let bulletRadius: CGFloat = 5
         let bulletSpeed: CGFloat = 700
@@ -49,8 +53,8 @@ class GameScene: SKScene {
         bullet.physicsBody?.friction = 0
         bullet.physicsBody?.categoryBitMask = 1
         bullet.physicsBody?.collisionBitMask = 1
-        bullet.physicsBody?.velocity.dx = cos(player.zRotation) * bulletSpeed + (player.physicsBody?.velocity.dx)!
-        bullet.physicsBody?.velocity.dy = sin(player.zRotation) * bulletSpeed + (player.physicsBody?.velocity.dy)!
+        bullet.physicsBody?.velocity.dx = cos(shooter.zRotation) * bulletSpeed + (shooter.physicsBody?.velocity.dx)!
+        bullet.physicsBody?.velocity.dy = sin(shooter.zRotation) * bulletSpeed + (shooter.physicsBody?.velocity.dy)!
         bullet.physicsBody?.mass = 0.0001
         
         // Add To Scene
@@ -58,7 +62,8 @@ class GameScene: SKScene {
     }
     
     func makeEnemy() {
-        let enemy = childNode(withName: "enemy")?.copy() as! SKNode
+        let enemy = childNode(withName: "enemyTemplate")?.copy() as! SKNode
+        enemy.name = "enemy"
         
         let posX = CGFloat.random(in: frame.minX...frame.maxX)
         let posY = CGFloat.random(in: frame.minY...frame.maxY)
@@ -110,10 +115,27 @@ class GameScene: SKScene {
     }
     
     
+    // Enemy Function
+    
+    func moveEnemy(enemyNode: SKNode) {
+        let dx = player.position.x - enemyNode.position.x
+        let dy = player.position.y - enemyNode.position.y
+        let angle = atan2(dy, dx)
+        enemyNode.zRotation = angle
+        
+        let velocity = CGVector(dx: dx / 2, dy: dy / 2)
+        enemyNode.physicsBody?.velocity = velocity
+    }
+    
+    func enemyShoot(enemyNode: SKNode) {
+        makeBullet(shooter: enemyNode)
+    }
+    
+    
     // Mouse Events
     
     override func mouseDown(with event: NSEvent) {
-        makeBullet()
+        makeBullet(shooter: player)
     }
 
     override func mouseMoved(with event: NSEvent) {
@@ -127,14 +149,25 @@ class GameScene: SKScene {
     }
     
     override func update(_ currentTime: TimeInterval) {
+        shootTimer += 1
+        
         if keyIsDown {
             keyPress(event: keyEvent)
         } else {
             player.physicsBody?.velocity = CGVector(dx: 0, dy: 0)
         }
         
-        if Int.random(in: 0...1000) < 2 {
+        if Int.random(in: 0...5000) < 2 {
             makeEnemy()
+        }
+        
+        for node in children {
+            if node.name?.contains("enemy") == true && node.name != "enemyTemplate" {
+                moveEnemy(enemyNode: node)
+                if shootTimer % 120 == 0 {
+                    enemyShoot(enemyNode: node)
+                }
+            }
         }
     }
 }
