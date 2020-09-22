@@ -28,6 +28,8 @@ class GameScene: SKScene {
         let border = SKPhysicsBody(edgeLoopFrom: self.frame)
         border.restitution = 0.7
         border.friction = 0
+        border.categoryBitMask = 1
+        border.collisionBitMask = 0
         self.physicsBody = border
         
         self.makeEnemy()
@@ -43,6 +45,7 @@ class GameScene: SKScene {
         
         // Create Bullet
         let bullet = SKShapeNode(circleOfRadius: bulletRadius)
+        bullet.name = "bullet"
         bullet.strokeColor = .red
         bullet.fillColor = .red
         bullet.position = startPos
@@ -51,8 +54,8 @@ class GameScene: SKScene {
         bullet.physicsBody = SKPhysicsBody(circleOfRadius: bulletRadius)
         bullet.physicsBody?.restitution = 1
         bullet.physicsBody?.friction = 0
-        bullet.physicsBody?.categoryBitMask = 1
-        bullet.physicsBody?.collisionBitMask = 1
+        bullet.physicsBody?.categoryBitMask = 2
+        bullet.physicsBody?.collisionBitMask = 2
         bullet.physicsBody?.velocity.dx = cos(shooter.zRotation) * bulletSpeed + (shooter.physicsBody?.velocity.dx)!
         bullet.physicsBody?.velocity.dy = sin(shooter.zRotation) * bulletSpeed + (shooter.physicsBody?.velocity.dy)!
         bullet.physicsBody?.mass = 0.0001
@@ -161,12 +164,16 @@ class GameScene: SKScene {
             makeEnemy()
         }
         
-        for node in children {
-            if node.name?.contains("enemy") == true && node.name != "enemyTemplate" {
-                moveEnemy(enemyNode: node)
-                if shootTimer % 120 == 0 {
-                    enemyShoot(enemyNode: node)
-                }
+        enumerateChildNodes(withName: "enemy") { enemy, _ in
+            self.moveEnemy(enemyNode: enemy)
+            if self.shootTimer % 120 == 0 {
+                self.enemyShoot(enemyNode: enemy)
+            }
+        }
+        
+        enumerateChildNodes(withName: "bullet") { bullet, _ in
+            if !bullet.frame.intersects(self.frame) {
+                bullet.removeFromParent()
             }
         }
     }
